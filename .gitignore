@@ -9,8 +9,6 @@ open_mastr/
 solar_berlin.csv
 solar_berlin_cleaned.csv
 
-#scripts
-master.sh
 
 # OS specific files
 .DS_Store
