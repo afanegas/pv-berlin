@@ -35,7 +35,7 @@ print("Success! Data is ready.")
 
 # %%
 today = date.today().isoformat()
-file_path = rf"open_mastr\data\dataversion-{today}\bnetza_mastr_solar_raw.csv"
+file_path = f"open_mastr/data/dataversion-{today}/bnetza_mastr_solar_raw.csv"
 output_file = "solar_berlin.csv"
 output_file_cleaned = 'solar_berlin_cleaned.csv'
 

@@ -73,14 +73,43 @@
             font-size: 0.9em;
             opacity: 0.9;
         }
+
+        .footer {
+            max-width: 1200px;
+            margin: 20px auto 0;
+            padding: 25px 40px;
+            text-align: center;
+        }
         
         .last-update {
-            text-align: right;
-            color: #718096;
-            font-size: 0.9em;
-            margin-top: 20px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.85);  /* Weiß mit 85% Transparenz */
+            font-size: 0.85em;  /* Etwas kleiner */
+            margin-bottom: 15px;  /* Weniger Abstand */
             font-weight: normal;
         }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 25px;  /* Etwas weniger Abstand */
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.9);  /* Weiß mit 90% Transparenz */
+            text-decoration: none;
+            font-size: 0.85em;  /* Kleiner */
+            font-weight: 400;  /* Weniger bold */
+            transition: all 0.2s ease;  /* Nicht nur color */
+            border-bottom: 1px solid transparent;  /* NEU: Für Hover-Effekt */
+        }
+
+        .footer-links a:hover {
+            color: white;  /* Voll weiß */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.6);  /* Unterstrich statt underline */
+        }
+
     </style>
 </head>
 <body>
@@ -107,7 +136,16 @@
             </div>
         </div>
         
+    </div>
+
+    <div class="footer">
         <div class="last-update" id="lastUpdate">Letzte Aktualisierung: -</div>
+        
+        <div class="footer-links">
+            <a href="#methodik">Methodik</a>
+            <a href="#" id="downloadLink">Rohdaten herunterladen</a>
+            <a href="#impressum">Impressum</a>
+        </div>
     </div>
 
     <script>
