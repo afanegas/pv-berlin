@@ -125,20 +125,20 @@
         <h1>Methodik</h1>
         
         <h2>Datenquelle</h2>
-        <p>Die hier dargestellten Daten stammen aus dem <strong><a href="https://www.marktstammdatenregister.de/MaStR" target="_blank" rel="noopener noreferrer">Marktstammdatenregister (MaStR)</a></strong> der Bundesnetzagentur. Das MaStR ist das zentrale Register für alle Strom- und Gaserzeugungsanlagen in Deutschland.</p>        
+        <p>Die dargestellten Daten stammen aus dem <strong><a href="https://www.marktstammdatenregister.de/MaStR" target="_blank" rel="noopener noreferrer">Marktstammdatenregister (MaStR)</a></strong> der Bundesnetzagentur. Das MaStR ist das zentrale Register für alle Strom- und Gaserzeugungsanlagen in Deutschland.</p>        
         <div class="info-box">
             <p><strong>Aktualisierung:</strong> Die Daten werden täglich automatisch aus dem MaStR heruntergeladen und verarbeitet.</p>
             <p><strong>Datenlizenz:</strong> Die MaStR-Daten stehen unter der <a href="https://www.govdata.de/dl-de/by-2-0" target="_blank" rel="noopener noreferrer">Datenlizenz Deutschland – Namensnennung – Version 2.0 (dl-de/by-2-0)</a>.</p>
         </div>
         
         <h2>Datenverarbeitung</h2>
-        <p>Für den Download und die Verarbeitung der MaStR-Daten wird die Python-Bibliothek <strong><a href="https://github.com/OpenEnergyPlatform/open-MaStR" target="_blank" rel="noopener noreferrer">open-MaStR</a></strong> verwendet. Diese Open-Source-Bibliothek vereinfacht den Zugriff auf die umfangreichen MaStR-Daten erheblich und ermöglicht eine automatisierte Aktualisierung.</p>
+        <p>Für den Download und die Verarbeitung der MaStR-Daten wird die Python-Bibliothek <strong><a href="https://github.com/OpenEnergyPlatform/open-MaStR" target="_blank" rel="noopener noreferrer">open-MaStR</a></strong> verwendet. Diese Open-Source-Bibliothek vereinfacht den Zugriff auf die umfangreichen MaStR-Daten und ermöglicht eine automatisierte Aktualisierung.</p>
         
         <h2>Berechnung: Netto-Zubau und Bestand</h2>
         <p>Die in den Visualisierungen dargestellten Werte berücksichtigen sowohl den Zubau als auch den Abbau von Photovoltaik-Anlagen:</p>
         
         <div class="info-box">
-            <p><strong>Netto-Zubau:</strong> Der jährliche Netto-Zubau ergibt sich aus der Differenz zwischen neu installierten Anlagen und abgebauten Anlagen im jeweiligen Jahr. Nur Anlagen mit dem Status "Dauerhaft stillgelegt" werden als Abbau berücksichtigt.</p>
+            <p><strong>Netto-Zubau:</strong> Der jährliche Netto-Zubau ergibt sich aus der Differenz zwischen neu installierten Anlagen und stillgelegten Anlagen im jeweiligen Jahr. Nur Anlagen mit dem Status "Dauerhaft stillgelegt" werden als Abbau berücksichtigt.</p>
             
             <p><strong>Installierte Leistung (Bestand):</strong> Die kumulierte installierte Leistung zeigt den Gesamtbestand an PV-Leistung zu einem bestimmten Zeitpunkt. Auch hier sind dauerhaft stillgelegte Anlagen bereits abgezogen.</p>
         </div>
@@ -153,7 +153,7 @@
                 <a href="https://github.com/afanegas/pv-berlin" target="_blank" rel="noopener noreferrer">github.com/afanegas/pv-berlin</a>
             </li>
             <li>
-                <strong>Server-seitige Verarbeitung</strong> 
+                <strong>Serverseitige Verarbeitung</strong> 
                 - Die tägliche Datenextraktion und -bereinigung erfolgt automatisiert auf dem Server mittels 
                 <strong><a href="https://github.com/OpenEnergyPlatform/open-MaStR" target="_blank" rel="noopener noreferrer">open-MaStR</a></strong> und 
                 <strong><a href="https://pandas.pydata.org/" target="_blank" rel="noopener noreferrer">Pandas</a></strong>.
@@ -167,8 +167,8 @@
                 - Bereitstellung der Benutzeroberfläche und responsives Design.
             </li>
         </ul>
-        
-    </div>
+        <h2>Fragen und Hinweise</h2>
+        <p>Haben Sie Fragen zur methodischen Aufbereitung, Anregungen zur Visualisierung oder Hinweise zu den Daten? Ich freue mich über Ihr Feedback oder einen fachlichen Austausch unter <a href="mailto:afanegascode@gmail.com">afanegascode@gmail.com</a>.</p>    </div>
     
     <div class="footer">
         <div class="footer-links">
