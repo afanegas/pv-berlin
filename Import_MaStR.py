@@ -40,7 +40,7 @@ if __name__ == "__main__":
     db = Mastr()
     
     print("Starting parallelized download on ...")
-    #db.download(data=["solar"])    
+    db.download(data=["solar"])    
     print("Converting to CSV...")
     
     #Importing the whole solar-table with the standard open-mastr-fucntion (to_csv) takes a lot of time, alternativ method is used
