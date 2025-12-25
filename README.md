@@ -38,6 +38,11 @@ Run the master script to update data and generate visualizations:
 ./master.sh
 ```
 
+Since the data import can take a long time, you can run it in the background:
+
+```bash
+nohup ./master.sh > output.log 2>&1 &
+```
 Or run individual components:
 
 ```bash
