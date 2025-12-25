@@ -58,18 +58,22 @@
         }
         
         .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center; /* This centers the boxes */
             gap: 20px;
             margin-top: 30px;
         }
-        
+
         .stat-card {
             background: linear-gradient(135deg, #F5BD25 0%, #ff9605 100%);
             color: white;
             padding: 20px;
             border-radius: 10px;
             text-align: center;
+            /* Give the cards a flexible base width so they grow/shrink nicely */
+            flex: 1 1 250px; 
+            max-width: 400px; /* Prevents cards from getting too wide on desktop */
         }
         
         .stat-value {
