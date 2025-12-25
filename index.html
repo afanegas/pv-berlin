@@ -75,6 +75,13 @@
             flex: 1 1 250px; 
             max-width: 400px; /* Prevents cards from getting too wide on desktop */
         }
+
+        @media (min-width: 650px) and (max-width: 900px) {
+            .stat-card:first-child {
+                flex-basis: 100%;
+                max-width: 100%;
+            }
+        }
         
         .stat-value {
             font-size: 2em;
@@ -229,11 +236,14 @@
         // Parse CSV
         function parseCSV(csv) {
             const lines = csv.trim().split('\n');
-            const headers = lines[0].split(',');
+            const headers = lines[0].split(',').map(h => h.trim()); 
             return lines.slice(1).map(line => {
                 const values = line.split(',');
                 return headers.reduce((obj, header, index) => {
-                    obj[header] = isNaN(values[index]) ? values[index] : parseFloat(values[index]);
+                    if (values[index] !== undefined) {
+                        let val = values[index].trim();
+                        obj[header] = isNaN(val) ? val : parseFloat(val);
+                    }
                     return obj;
                 }, {});
             });
@@ -267,11 +277,12 @@
                 .filter(row => row.Jahr >= startYear)
                 .map(row => ({
                     Jahr: row.Jahr,
-                    Power_MW: row.Bestand_Leistung_kW / 1000, // Convert kW to MW
-                    Netto_Zubau_MW: row.Netto_Zubau_Leistung_kW / 1000 // Convert kW to MW
+                    Power_MW: row.Bestand_Leistung_kW / 1000,
+                    Netto_Zubau_MW: row.Netto_Zubau_Leistung_kW / 1000,
+                    Anzahl_Gesamt: row.Bestand_Anzahl,
+                    Anzahl_Neu: row.Netto_Zubau_Anzahl 
                 }))
                 .sort((a, b) => a.Jahr - b.Jahr);
-
             // Create Bar Chart for Cumulated Power per Year
             const trace = {
                 x: data.map(d => d.Jahr),
@@ -280,18 +291,19 @@
                 name: 'Kumulierte Leistung',
                 marker: {
                     color: '#ff9605',
-                    line: {
-                        color: '#e67e00',
-                        width: 1
-                    }
+                    line: { color: '#e67e00', width: 1 }
                 },
                 texttemplate: '%{y:.1f} MWp',
                 textposition: window.innerWidth < 600 ? 'none' : 'outside',
-                hovertemplate: '<b>%{x}</b><br>' +
-                            'Gesamtleistung: %{y:.1f} MWp<br>' +
-                            'Zubau: %{customdata:.1f} MWp<br>' +
-                            '<extra></extra>',
-                customdata: data.map(d => d.Netto_Zubau_MW)
+                hovertemplate: '<b>Jahr %{x}</b><br>' + 
+                        '<b>Bestand:</b><br>' +
+                        'Leistung: %{y:.1f} MWp<br>' +
+                        'Anlagen: %{customdata[1]:,d}<br>' + 
+                        '<b>Netto-Zubau:</b><br>' +
+                        'Leistung: +%{customdata[0]:.1f} MWp<br>' +
+                        'Anlagen: +%{customdata[2]:,d}<br>' +
+                        '<extra></extra>',
+                customdata: data.map(d => [d.Netto_Zubau_MW, d.Anzahl_Gesamt, d.Anzahl_Neu])
             };
 
             const layout = {
@@ -360,7 +372,11 @@
                 }
             }
             
-            window.addEventListener('resize', updateChart);
+            let resizeTimer;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(updateChart, 150);
+            });
             updateChart();
 
             // Calculate and display statistics (always from full dataset)
