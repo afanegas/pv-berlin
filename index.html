@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Berlin PV-Ausbau</title>
+    <title>Berliner PV-Monitor</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-locale-de-latest.js"></script>
@@ -376,8 +376,8 @@
             const formattedDate = datumDownload.split('-').reverse().join('.');
 
             document.getElementById('currentYear').textContent = latestYear;
-            document.getElementById('totalPower').textContent = totalPower.toFixed(1) + ' MWp';
-            document.getElementById('nettoZubau').textContent = nettoZubau.toFixed(1) + ' MWp';
+            document.getElementById('totalPower').textContent = totalPower.toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' MWp';
+            document.getElementById('nettoZubau').textContent = nettoZubau.toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' MWp';
             document.getElementById('lastUpdate').textContent = `Letzte Aktualisierung: ${formattedDate}, Quelle: MaStR, Bundesnetzagentur`;
         }
 
