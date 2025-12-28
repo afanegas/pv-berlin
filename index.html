@@ -60,7 +60,7 @@
         .hoverlayer .hovertext {
             filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15)) !important;
         }
-
+        
         .stats {
             display: flex;
             flex-wrap: wrap;
@@ -191,6 +191,46 @@
                 margin-right: auto;
             }
         }
+        .toggle-container {
+        display: flex;
+        justify-content: center;
+        margin: 30px 0;
+        }
+
+        .toggle-wrapper {
+            display: inline-flex;
+            background: #f0f0f0;
+            border-radius: 25px;
+            padding: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .toggle-btn {
+            padding: 10px 24px;
+            border: none;
+            background: transparent;
+            border-radius: 21px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toggle-btn.active {
+            background: linear-gradient(135deg, #F5BD25 0%, #ff9605 100%);
+            color: white;
+            box-shadow: 0 2px 6px rgba(255, 150, 5, 0.3);
+        }
+
+        .toggle-btn:hover:not(.active) {
+            color: #333;
+        }
+
+
     </style>
 </head>
 <body>
@@ -215,15 +255,31 @@
                 <div class="stat-label">Aktuelles Jahr</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value" id="totalPower">-</div>
-                <div class="stat-label">Gesamtinstallierte Leistung</div>
+                <div class="stat-value" id="totalValue">-</div>
+                <div class="stat-label" id="totalLabel">Gesamtinstallierte Leistung</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value" id="nettoZubau">-</div>
-                <div class="stat-label">Jahres Netto-Zubau</div>
+                <div class="stat-value" id="nettoZubauValue">-</div>
+                <div class="stat-label" id="nettoZubauLabel">Jahres Netto-Zubau</div>
             </div>
         </div>
+        </div>
+        </div>
         
+        <div class="toggle-container">
+            <div class="toggle-wrapper">
+                <button class="toggle-btn active" data-view="power">
+                    <svg class="toggle-icon" viewBox="0 0 24 24" fill="currentColor" style="width: 16px; height: 16px;">
+                        <path d="M13 2L3 14h8l-1 8 10-12h-8z"/>
+                    </svg>
+                    <span>Leistung</span>
+                </button>
+                <button class="toggle-btn" data-view="units">
+                    <span class="toggle-icon">#</span>
+                    <span>Anzahl</span>
+                </button>
+            </div>
+        </div>
     </div>
 
     <div class="footer">
@@ -272,7 +328,59 @@
             }
         }
 
+        // Toggle functionality
+        document.querySelectorAll('.toggle-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active class from all buttons
+                document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                window.currentView = this.dataset.view;
+                
+                // Update chart
+                const newTrace = createTrace(window.chartData, window.currentView);
+                Plotly.restyle('powerChart', {
+                    y: [newTrace.y],
+                    texttemplate: [newTrace.texttemplate],
+                    hovertemplate: [newTrace.hovertemplate]
+                });
+                
+                // Update y-axis title and chart title
+                let titleText;
+                if (window.innerWidth < 600) {
+                    // Mobile titles
+                    titleText = window.currentView === 'power' ? 'Installierte PV-Leistung' : 'Anzahl PV-Anlagen';
+                } else {
+                    // Desktop titles
+                    titleText = window.currentView === 'power' 
+                        ? 'Entwicklung der installierten PV-Leistung in Berlin' 
+                        : 'Entwicklung der Anzahl von PV-Anlagen in Berlin';
+                }
+
+                // Update stats
+                const allData = window.solarData
+                    .filter(row => row.Jahr >= 2010)
+                    .map(row => ({
+                        Jahr: row.Jahr,
+                        Power_MW: row.Bestand_Leistung_kW / 1000,
+                        Netto_Zubau_MW: row.Netto_Zubau_Leistung_kW / 1000,
+                        Anzahl_Gesamt: row.Bestand_Anzahl,
+                        Anzahl_Neu: row.Netto_Zubau_Anzahl
+                    }))
+                    .sort((a, b) => a.Jahr - b.Jahr);
+
+                updateStats(allData);
+            });
+        });
         function processAndVisualize(rawData) {
+            // Store data globally for toggle functionality
+            window.solarData = rawData;
+            // Only set default view if not already set
+            if (!window.currentView) {
+                window.currentView = 'power';
+            }
+            
             // Determine starting year based on screen width
             const startYear = window.innerWidth < 600 ? 2017 : 2010;
             
@@ -287,33 +395,19 @@
                     Anzahl_Neu: row.Netto_Zubau_Anzahl 
                 }))
                 .sort((a, b) => a.Jahr - b.Jahr);
-            // Create Bar Chart for Cumulated Power per Year
-            const trace = {
-                x: data.map(d => d.Jahr),
-                y: data.map(d => d.Power_MW),
-                type: 'bar',
-                name: 'Kumulierte Leistung',
-                marker: {
-                    color: '#ff9605',
-                    line: { color: '#e67e00', width: 1 }
-                },
-                texttemplate: '%{y:.1f} MWp',
-                textposition: window.innerWidth < 600 ? 'none' : 'outside',
-                hovertemplate: '<b>Jahr %{x}</b><br>' + 
-                        '<b>Bestand:</b><br>' +
-                        'Leistung: %{y:.1f} MWp<br>' +
-                        'Anlagen: %{customdata[1]:,d}<br>' + 
-                        '<b>Netto-Zubau:</b><br>' +
-                        'Leistung: +%{customdata[0]:.1f} MWp<br>' +
-                        'Anlagen: +%{customdata[2]:,d}<br>' +
-                        '<extra></extra>',
-                customdata: data.map(d => [d.Netto_Zubau_MW, d.Anzahl_Gesamt, d.Anzahl_Neu])
-            };
+
+                // Store data globally for chart updates
+            window.chartData = data;
+
+            // Create Bar Chart
+            const trace = createTrace(data, window.currentView);
 
             const layout = {
                 height: window.innerWidth < 600 ? 350 : undefined,  //  smaller on mobile, auto on desktop
                 title: {
-                    text: 'Entwicklung der installierten PV-Leistung in Berlin',
+                    text: window.currentView === 'power' 
+                        ? 'Entwicklung der installierten PV-Leistung in Berlin'
+                        : 'Entwicklung der Anzahl von PV-Anlagen in Berlin',
                     font: { size: 20, color: '#2d3748' }
                 },
                 dragmode: false, // Disables dragging (pan/zoom) as the standard startup tool
@@ -324,9 +418,9 @@
                     dtick: 1
                 },
                 yaxis: {
-                    title: 'Kumulierte Leistung (MWp)',
+                    title: window.currentView === 'power' ? 'Kumulierte Leistung (MWp)' : 'Anzahl Anlagen',
                     gridcolor: '#e2e8f0',
-                    fixedrange: true // Enables zooming on Y axis
+                    fixedrange: true
                 },
                 plot_bgcolor: '#f7fafc',
                 paper_bgcolor: 'white',
@@ -335,7 +429,7 @@
                 hoverlabel: {  
                     bgcolor: 'white',
                     font: {
-                        color: '#2d3748',
+                        color: '#4a5568',
                         size: 13,
                         family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
                     },
@@ -344,11 +438,20 @@
                 }
             };
 
+            const datumDownload = rawData[0].DatumDownload;
+            const formattedDateFilename = datumDownload.split('-').reverse().join('.');
+
             const config = {
                 responsive: true,
                 displaylogo: false,
-                modeBarButtons: [['zoom2d', 'toImage', 'resetScale2d']]  
-                //staticPlot: false, // This disables the ability to zoom/pan/interact with the data points, Must be false to show the modebar
+                modeBarButtons: [['zoom2d', 'toImage', 'resetScale2d']],
+                toImageButtonOptions: {
+                    format: 'png',
+                    filename: `Berliner_PV-Monitor_Stand_${formattedDateFilename}`,
+                    height: 800,
+                    width: 1200,
+                    scale: 2
+                }
             };
 
             Plotly.newPlot('powerChart', [trace], layout, config);
@@ -361,12 +464,21 @@
                     processAndVisualize(rawData);
                 } else {
                     // Just update title and text position
+                    let titleText;
+                    if (window.innerWidth < 600) {
+                        // Mobile titles
+                        titleText = window.currentView === 'power' ? 'Installierte PV-Leistung' : 'Anzahl PV-Anlagen';
+                    } else {
+                        // Desktop titles
+                        titleText = window.currentView === 'power' 
+                            ? 'Entwicklung der installierten PV-Leistung in Berlin' 
+                            : 'Entwicklung der Anzahl von PV-Anlagen in Berlin';
+                    }
+                    
                     const update = {
-                        'title.text': window.innerWidth < 600 
-                            ? 'Installierte PV-Leistung' 
-                            : 'Entwicklung der installierten PV-Leistung in Berlin',
+                        'title.text': titleText,
                         'title.font.size': window.innerWidth < 600 ? 16 : 20,
-                        'height': window.innerWidth < 600 ? 350 : undefined  // Add this line
+                        'height': window.innerWidth < 600 ? 350 : undefined
                     };
                     Plotly.relayout('powerChart', update);                    
                     // Update text visibility
@@ -393,20 +505,83 @@
                 }))
                 .sort((a, b) => a.Jahr - b.Jahr);
             
+            updateStats(allData);
+            
+
+        }
+        function createTrace(data, view) {
+            const isPower = view === 'power';
+            
+            return {
+                x: data.map(d => d.Jahr),
+                y: isPower ? data.map(d => d.Power_MW) : data.map(d => d.Anzahl_Gesamt),
+                type: 'bar',
+                name: isPower ? 'Kumulierte Leistung' : 'Anzahl Anlagen',
+                marker: {
+                    color: '#ff9605',
+                    line: { color: '#e67e00', width: 1 }
+                },
+                // Bar labels (currently disabled)
+                // texttemplate: isPower ? '%{y:.1f} MWp' : '%{y:,d}',
+                // textposition: window.innerWidth < 600 ? 'none' : 'outside',
+                // textfont: {
+                //     size: 12,
+                //     color: '#2d3748'
+                // },
+                hovertemplate: isPower 
+                    ? '<b style="color:#2d3748">Jahr %{x}</b><br>' +
+                    '<b>Bestand:</b><br>' +
+                    'Leistung: %{customdata[0]:.1f} MWp<br>' +
+                    'Anlagen: %{customdata[1]:,d}<br>' +
+                    '<b>Netto-Zubau:</b><br>' +
+                    'Leistung: +%{customdata[2]:.1f} MWp<br>' +
+                    'Anlagen: +%{customdata[3]:,d}<br>' +
+                    '<extra></extra>'
+                    : '<b style="color:#2d3748">Jahr %{x}</b><br>' +
+                    '<b>Bestand:</b><br>' +
+                    'Anlagen: %{customdata[1]:,d}<br>' +
+                    'Leistung: %{customdata[0]:.1f} MWp<br>' +
+                    '<b>Netto-Zubau:</b><br>' +
+                    'Anlagen: +%{customdata[3]:,d}<br>' +
+                    'Leistung: +%{customdata[2]:.1f} MWp<br>' +
+                    '<extra></extra>',
+                customdata: data.map(d => [d.Power_MW, d.Anzahl_Gesamt, d.Netto_Zubau_MW, d.Anzahl_Neu])
+            };
+        }
+        // New function to update stats based on view
+        function updateStats(allData) {
             const latestYear = allData[allData.length - 1].Jahr;
-            const totalPower = allData[allData.length - 1].Power_MW;
-            const nettoZubau = allData[allData.length - 1].Netto_Zubau_MW;
-            const datumDownload = rawData[0].DatumDownload;
+            const latestData = allData[allData.length - 1];
+            const datumDownload = window.solarData[0].DatumDownload;
             const formattedDate = datumDownload.split('-').reverse().join('.');
 
             document.getElementById('currentYear').textContent = latestYear;
-            document.getElementById('totalPower').textContent = totalPower.toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' MWp';
-            document.getElementById('nettoZubau').textContent = nettoZubau.toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' MWp';
-            document.getElementById('lastUpdate').textContent = `Letzte Aktualisierung: ${formattedDate}, Quelle: MaStR, Bundesnetzagentur`;
+            
+            if (window.currentView === 'power') {
+                document.getElementById('totalValue').textContent = 
+                    latestData.Power_MW.toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' MWp';
+                document.getElementById('totalLabel').textContent = 'Gesamtinstallierte Leistung';
+                
+                document.getElementById('nettoZubauValue').textContent = 
+                    latestData.Netto_Zubau_MW.toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' MWp';
+                document.getElementById('nettoZubauLabel').textContent = 'Jahres Netto-Zubau';
+            } else {
+                // Units view
+                document.getElementById('totalValue').textContent = 
+                    latestData.Anzahl_Gesamt.toLocaleString('de-DE');
+                document.getElementById('totalLabel').textContent = 'Anlagen Gesamt';
+                
+                document.getElementById('nettoZubauValue').textContent = 
+                    '+' + latestData.Anzahl_Neu.toLocaleString('de-DE');
+                document.getElementById('nettoZubauLabel').textContent = 'Neu installierte Anlagen';
+            }
+            
+            document.getElementById('lastUpdate').textContent = 
+                `Letzte Aktualisierung: ${formattedDate}, Quelle: MaStR, Bundesnetzagentur`;
         }
-
         // Load data when page loads
         loadData();
+
         // Download CSV functionality
         document.getElementById('downloadLink').addEventListener('click', async (e) => {
             e.preventDefault();
@@ -416,7 +591,12 @@
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'solar_berlin_yearly.csv';
+                
+                // Create filename with date
+                const datumDownload = window.solarData[0].DatumDownload;
+                const formattedDateFilename = datumDownload.split('-').reverse().join('.');
+                a.download = `Berliner_PV-Monitor_Stand_${formattedDateFilename}.csv`;
+                
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);
