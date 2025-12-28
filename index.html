@@ -230,7 +230,12 @@
             color: #333;
         }
 
-
+        @media (min-width: 1024px) {
+            body {
+                transform: scale(0.8);
+                transform-origin: top center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -275,7 +280,7 @@
                     <span>Leistung</span>
                 </button>
                 <button class="toggle-btn" data-view="units">
-                    <span class="toggle-icon">#</span>
+                    <span class="toggle-icon" style="font-weight: bold;">#</span>
                     <span>Anzahl</span>
                 </button>
             </div>
