@@ -353,15 +353,22 @@
                 
                 // Update y-axis title and chart title
                 let titleText;
+                let yAxisTitle;
                 if (window.innerWidth < 600) {
                     // Mobile titles
                     titleText = window.currentView === 'power' ? 'Installierte PV-Leistung' : 'Anzahl PV-Anlagen';
                 } else {
                     // Desktop titles
                     titleText = window.currentView === 'power' 
-                        ? 'Entwicklung der installierten PV-Leistung in Berlin' 
-                        : 'Entwicklung der Anzahl von PV-Anlagen in Berlin';
+                        ? 'Entwicklung der <b style="color:#ff9605">installierten PV-Leistung</b> in Berlin' 
+                        : 'Entwicklung der <b style="color:#ff9605">Anzahl von PV-Anlagen</b> in Berlin';
                 }
+                yAxisTitle = window.currentView === 'power' ? 'Kumulierte Leistung (MWp)' : 'Anzahl Anlagen';
+
+                Plotly.relayout('powerChart', {
+                    'title.text': titleText,
+                    'yaxis.title': yAxisTitle
+                });
 
                 // Update stats
                 const allData = window.solarData
@@ -423,14 +430,18 @@
                     dtick: 1
                 },
                 yaxis: {
-                    title: window.currentView === 'power' ? 'Kumulierte Leistung (MWp)' : 'Anzahl Anlagen',
-                    gridcolor: '#e2e8f0',
-                    fixedrange: true
+                title: {
+                    text: window.currentView === 'power' ? 'Kumulierte Leistung (MWp)' : 'Anzahl Anlagen',
+                    standoff: 10
+                },
+                        gridcolor: '#e2e8f0',
+                    fixedrange: true,
+                    tickformat: ',.0f'
                 },
                 plot_bgcolor: '#f7fafc',
                 paper_bgcolor: 'white',
                 hovermode: 'closest',
-                margin: { t: 60, r: 40, b: 60, l: 60 },
+                margin: { t: 60, r: 40, b: 60, l: 70 },
                 hoverlabel: {  
                     bgcolor: 'white',
                     font: {
@@ -476,8 +487,8 @@
                     } else {
                         // Desktop titles
                         titleText = window.currentView === 'power' 
-                            ? 'Entwicklung der installierten PV-Leistung in Berlin' 
-                            : 'Entwicklung der Anzahl von PV-Anlagen in Berlin';
+                            ? 'Entwicklung der <b style="color:#ff9605">installierten PV-Leistung</b> in Berlin' 
+                            : 'Entwicklung der <b style="color:#ff9605">Anzahl von PV-Anlagen</b> in Berlin';
                     }
                     
                     const update = {
